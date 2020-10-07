@@ -1,17 +1,41 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import "semantic-ui-css/semantic.css";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import configureStore from "./store/configureStore";
+const store = configureStore();
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const rootEl = document.getElementById("root");
+
+let render = () => {
+  const App = require("./App").default;
+
+  ReactDOM.render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+    rootEl
+  );
+};
+
+if (module.hot) {
+  const renderApp = render;
+  const renderError = (error) => {
+    const RedBox = require("redbox-react").default;
+    ReactDOM.render(<RedBox error={error} />, rootEl);
+  };
+  render = () => {
+    try {
+      renderApp();
+    } catch (error) {
+      console.log(error);
+      renderError(error);
+    }
+  };
+  module.hot.accept("./App", () => {
+    setTimeout(render);
+  });
+}
+
+render();
